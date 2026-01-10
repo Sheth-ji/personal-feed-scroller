@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Personal Feed</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: #fafafa;
+            overflow-x: hidden;
+        }
+
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            border-bottom: 1px solid #dbdbdb;
+            padding: 12px 20px;
+            z-index: 100;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-size: 24px;
+            font-weight: 600;
+        }
+
+        .choose-btn {
+            background: #0095f6;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.2s;
+        }
+
+        .choose-btn:hover {
+            background: #0081d8;
+        }
+
+        .feed-container {
+            max-width: 470px;
+            margin: 70px auto 0;
+            padding: 0 0 40px 0;
+        }
+
+        .post {
+            background: white;
+            border: 1px solid #dbdbdb;
+            border-radius: 8px;
+            margin-bottom: 32px;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+        }
+
+        .post-header {
+            padding: 14px 16px;
+            display: flex;
+            align-items: center;
+            background: #f8f9fa;
+            border-bottom: 1px solid #dbdbdb;
+        }
+
+        .post-header .filename {
+            font-weight: 600;
+            font-size: 14px;
+            color: #262626;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .post-media {
+            position: relative;
+            width: 100%;
+            background: #000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .post-media img,
+        .post-media video {
+            width: 100%;
+            height: auto;
+            display: block;
+            max-height: 600px;
+            object-fit: contain;
+        }
+
+        .video-controls {
+            position: absolute;
+            bottom: 12px;
+            right: 12px;
+            display: none;
+            gap: 8px;
+            z-index: 10;
+        }
+
+        .post-media:hover .video-controls {
+            display: flex;
+        }
+
+        .speed-btn {
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            border: none;
+            padding: 6px 10px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            backdrop-filter: blur(10px);
+        }
+
+        .speed-btn.active {
+            background: #0095f6;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #8e8e8e;
+        }
+
+        .empty-state h2 {
+            font-size: 22px;
+            margin-bottom: 10px;
+            color: #262626;
+        }
+
+        .empty-state p {
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #8e8e8e;
+            font-size: 14px;
+        }
+
+        @media (max-width: 600px) {
+            .feed-container {
+                max-width: 100%;
+                margin-top: 60px;
+            }
+
+            .post {
+                border-radius: 0;
+                border-left: none;
+                border-right: none;
+                margin-bottom: 0;
+            }
+
+            .header h1 {
+                font-size: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Personal Feed</h1>
+        <button class="choose-btn" onclick="chooseFolder()">Choose Folder</button>
+    </div>
+
+    <div class="feed-container" id="feed">
+        <div class="empty-state">
+            <h2>Welcome to Your Personal Feed</h2>
+            <p>Click "Choose Folder" to start scrolling through your images and videos</p>
+        </div>
+    </div>
+
+    <input type="file" id="folderInput" webkitdirectory directory multiple style="display: none;">
+
+    <script>
+        let allFiles = [];
+        let currentIndex = 0;
+        const batchSize = 5;
+        let isLoading = false;
+
+        const supportedImageTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+        const supportedVideoTypes = ['video/mp4', 'video/webm', 'video/ogg', 'video/quicktime'];
+
+        function chooseFolder() {
+            document.getElementById('folderInput').click();
+        }
+
+        document.getElementById('folderInput').addEventListener('change', function(e) {
+            const files = Array.from(e.target.files);
+            
+            allFiles = files.filter(file => {
+                return supportedImageTypes.includes(file.type) || supportedVideoTypes.includes(file.type);
+            });
+
+            if (allFiles.length === 0) {
+                alert('No supported media files found in this folder. Please choose a folder with images or videos.');
+                return;
+            }
+
+            // Shuffle the files
+            allFiles = shuffleArray(allFiles);
+            
+            // Reset and load
+            currentIndex = 0;
+            document.getElementById('feed').innerHTML = '';
+            loadMorePosts();
+        });
+
+        function shuffleArray(array) {
+            const shuffled = [...array];
+            for (let i = shuffled.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+            }
+            return shuffled;
+        }
+
+        function loadMorePosts() {
+            if (isLoading || currentIndex >= allFiles.length) return;
+            
+            isLoading = true;
+            const feed = document.getElementById('feed');
+            
+            const endIndex = Math.min(currentIndex + batchSize, allFiles.length);
+            
+            for (let i = currentIndex; i < endIndex; i++) {
+                const file = allFiles[i];
+                const post = createPost(file);
+                feed.appendChild(post);
+            }
+            
+            currentIndex = endIndex;
+            isLoading = false;
+
+            if (currentIndex >= allFiles.length) {
+                const endMessage = document.createElement('div');
+                endMessage.className = 'loading';
+                endMessage.textContent = "You've reached the end! Click 'Choose Folder' to load more content.";
+                feed.appendChild(endMessage);
+            }
+        }
+
+        function createPost(file) {
+            const post = document.createElement('div');
+            post.className = 'post';
+
+            const header = document.createElement('div');
+            header.className = 'post-header';
+            header.innerHTML = `<div class="filename">${file.name}</div>`;
+
+            const mediaContainer = document.createElement('div');
+            mediaContainer.className = 'post-media';
+
+            const url = URL.createObjectURL(file);
+
+            if (supportedImageTypes.includes(file.type)) {
+                const img = document.createElement('img');
+                img.src = url;
+                img.alt = file.name;
+                mediaContainer.appendChild(img);
+            } else if (supportedVideoTypes.includes(file.type)) {
+                const video = document.createElement('video');
+                video.src = url;
+                video.loop = true;
+                video.muted = true;
+                video.playsInline = true;
+                
+                // Auto-play when in viewport
+                const observer = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            video.play().catch(() => {});
+                        } else {
+                            video.pause();
+                        }
+                    });
+                }, { threshold: 0.5 });
+                observer.observe(video);
+
+                // Tap to pause/play
+                video.addEventListener('click', () => {
+                    if (video.paused) {
+                        video.play();
+                    } else {
+                        video.pause();
+                    }
+                });
+
+                // Speed controls
+                const controls = document.createElement('div');
+                controls.className = 'video-controls';
+                
+                const speeds = [0.5, 1, 1.5, 2];
+                speeds.forEach(speed => {
+                    const btn = document.createElement('button');
+                    btn.className = 'speed-btn' + (speed === 1 ? ' active' : '');
+                    btn.textContent = `${speed}x`;
+                    btn.onclick = (e) => {
+                        e.stopPropagation();
+                        video.playbackRate = speed;
+                        controls.querySelectorAll('.speed-btn').forEach(b => b.classList.remove('active'));
+                        btn.classList.add('active');
+                    };
+                    controls.appendChild(btn);
+                });
+
+                mediaContainer.appendChild(video);
+                mediaContainer.appendChild(controls);
+            }
+
+            post.appendChild(header);
+            post.appendChild(mediaContainer);
+
+            return post;
+        }
+
+        // Infinite scroll
+        window.addEventListener('scroll', () => {
+            if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 500) {
+                loadMorePosts();
+            }
+        });
+    </script>
+</body>
+</html>
