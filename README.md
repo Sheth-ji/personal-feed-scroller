@@ -47,6 +47,36 @@ This project embraces the spirit of old-school internet software:
 - Free and open source
 - No monetization of your attention
 
+## Privacy & Security
+
+**Your data never leaves your device.**
+
+- ✅ No uploads to any server
+- ✅ No tracking or analytics
+- ✅ No internet connection required
+- ✅ Files are read directly from your local storage
+- ✅ Everything runs in your browser
+
+You can verify this by turning off your internet connection - the app works exactly the same.
+
+## Security
+
+**Is my data safe?**
+
+Yes. Here's how:
+
+🔒 **Browser Isolation** - Your photos are isolated from other websites by your browser's built-in security (Same-Origin Policy)
+
+🔒 **No Network Access** - The app doesn't connect to the internet at all. Even if someone compromised another website you're visiting, they cannot access your photos through this app.
+
+🔒 **HTTPS Delivery** - When hosted on GitHub Pages, the app is served over HTTPS, preventing tampering during download
+
+🔒 **Open Source** - All code is visible. You (or anyone technical) can inspect it to verify there's no malicious behavior
+
+🔒 **No Persistence** - When you close the tab, all loaded data is cleared from memory
+
+**The only real risk:** Malicious browser extensions that have access to all your tabs. This is outside any web app's control - choose your browser extensions wisely!
+
 ## Browser Compatibility
 
 Works in all modern browsers. For best experience:
