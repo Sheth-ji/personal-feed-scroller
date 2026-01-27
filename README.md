@@ -18,10 +18,16 @@ Tired of social media algorithms? Miss the days when software just did its job w
 
 ## How to Use
 
-1. **Download** the `personal-feed.html` file
+**Option 1: Use Directly (Easiest)**
+1. **Visit** https://ignatius-42.github.io/personal-feed-scroller/
+2. **Click "Choose Folder"** and select a folder with your images/videos
+3. **Start scrolling!** The app will shuffle and display everything
+
+**Option 2: Download and Use Offline**
+1. **Download** the `index.html` file from this repository
 2. **Open it** in any modern browser (Chrome, Firefox, Safari, Edge)
 3. **Click "Choose Folder"** and select a folder with your images/videos
-4. **Start scrolling!** The app will shuffle and display everything
+4. **Start scrolling!** Works completely offline
 
 That's it. No installation, no configuration, no signup.
 
@@ -94,5 +100,7 @@ This project is free and open source - built to help, not to profit.
 MIT License - feel free to use, modify, and share!
 
 ---
+
+*Part of the Ignatius-42 collection: simple, honest tools that respect users.*
 
 Built with the belief that software should serve users, not exploit them.
