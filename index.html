@@ -102,34 +102,7 @@
             object-fit: contain;
         }
 
-        .video-controls {
-            position: absolute;
-            bottom: 12px;
-            right: 12px;
-            display: none;
-            gap: 8px;
-            z-index: 10;
-        }
 
-        .post-media:hover .video-controls {
-            display: flex;
-        }
-
-        .speed-btn {
-            background: rgba(0, 0, 0, 0.7);
-            color: white;
-            border: none;
-            padding: 6px 10px;
-            border-radius: 6px;
-            font-size: 12px;
-            font-weight: 600;
-            cursor: pointer;
-            backdrop-filter: blur(10px);
-        }
-
-        .speed-btn.active {
-            background: #0095f6;
-        }
 
         .empty-state {
             text-align: center;
@@ -279,13 +252,14 @@
                 const video = document.createElement('video');
                 video.src = url;
                 video.loop = true;
-                video.muted = true;
                 video.playsInline = true;
+                video.controls = true;
                 
-                // Auto-play when in viewport
+                // Auto-play when in viewport (muted for autoplay to work)
                 const observer = new IntersectionObserver((entries) => {
                     entries.forEach(entry => {
                         if (entry.isIntersecting) {
+                            video.muted = true;
                             video.play().catch(() => {});
                         } else {
                             video.pause();
@@ -294,35 +268,7 @@
                 }, { threshold: 0.5 });
                 observer.observe(video);
 
-                // Tap to pause/play
-                video.addEventListener('click', () => {
-                    if (video.paused) {
-                        video.play();
-                    } else {
-                        video.pause();
-                    }
-                });
-
-                // Speed controls
-                const controls = document.createElement('div');
-                controls.className = 'video-controls';
-                
-                const speeds = [0.5, 1, 1.5, 2];
-                speeds.forEach(speed => {
-                    const btn = document.createElement('button');
-                    btn.className = 'speed-btn' + (speed === 1 ? ' active' : '');
-                    btn.textContent = `${speed}x`;
-                    btn.onclick = (e) => {
-                        e.stopPropagation();
-                        video.playbackRate = speed;
-                        controls.querySelectorAll('.speed-btn').forEach(b => b.classList.remove('active'));
-                        btn.classList.add('active');
-                    };
-                    controls.appendChild(btn);
-                });
-
                 mediaContainer.appendChild(video);
-                mediaContainer.appendChild(controls);
             }
 
             post.appendChild(header);
